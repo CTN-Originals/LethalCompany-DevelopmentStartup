@@ -5,6 +5,7 @@
 /.vscode/
 *.bat
 NuGet.[C|c]onfig
+/resources/
 
 # This .gitignore file should be placed at the root of your Unity project directory
 #
