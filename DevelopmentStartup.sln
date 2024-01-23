@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.002.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CTNFastStartup", "CTNFastStartup\CTNFastStartup.csproj", "{85AE4AF2-FA11-46EB-A2B1-1BB95E296E61}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DevelopmentStartup", "DevelopmentStartup\DevelopmentStartup.csproj", "{85AE4AF2-FA11-46EB-A2B1-1BB95E296E61}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

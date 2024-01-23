@@ -4,7 +4,7 @@ using HarmonyLib;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace FastStartup
+namespace DevelopmentStartup
 {
 	[BepInPlugin(PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
 	public class Plugin : BaseUnityPlugin
@@ -101,7 +101,7 @@ namespace FastStartup
 			if (Plugin.launchMode == Plugin.LaunchMode.LAN) {
 				__instance.LAN_HostSetLocal();
 			}
-			__instance.lobbyNameInputField.text = "CTNFastStartup Lobby";
+			__instance.lobbyNameInputField.text = "DevelopmentStartup Lobby";
 			__instance.ConfirmHostButton();
 
 			firstTimeLoad = false;
