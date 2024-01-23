@@ -9,11 +9,11 @@ namespace FastStartup
 	[BepInPlugin(PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
 	public class Plugin : BaseUnityPlugin
 	{
-		public enum GameMode {
+		public enum LaunchMode {
 			Online,
 			LAN,
 		}
-		public static GameMode gameMode = GameMode.LAN;
+		public static LaunchMode launchMode = LaunchMode.LAN;
 		public static ManualLogSource CLog;
 
 		private readonly Harmony harmony = new Harmony(PluginInfo.PLUGIN_GUID);
@@ -27,8 +27,8 @@ namespace FastStartup
 		}
 
 		private void ConfigFile() {
-			gameMode = Config.Bind("General", "GameMode", GameMode.LAN, "The game mode to start in (Online or LAN)").Value;
-			Console.Log($"GameMode: {gameMode}");
+			launchMode = Config.Bind("General", "LaunchMode", LaunchMode.LAN, "The launch mode to start in (Online or LAN)").Value;
+			Console.Log($"LaunchMode: {launchMode}");
 		}
 	}
 
@@ -66,11 +66,11 @@ namespace FastStartup
 			IngamePlayerSettings.Instance.SaveChangedSettings();
 			if (!IngamePlayerSettings.Instance.encounteredErrorDuringSave)
 			{
-				switch (Plugin.gameMode) {
-					case Plugin.GameMode.Online:
+				switch (Plugin.launchMode) {
+					case Plugin.LaunchMode.Online:
 						SceneManager.LoadScene("InitScene");
 						break;
-					case Plugin.GameMode.LAN:
+					case Plugin.LaunchMode.LAN:
 					default:
 						SceneManager.LoadScene("InitSceneLANMode");
 						break;
@@ -98,10 +98,10 @@ namespace FastStartup
 				return;
 			}
 			__instance.ClickHostButton();
-			if (Plugin.gameMode == Plugin.GameMode.LAN) {
+			if (Plugin.launchMode == Plugin.LaunchMode.LAN) {
 				__instance.LAN_HostSetLocal();
 			}
-			__instance.lobbyNameInputField.text = "CTN Fast Startup Lobby";
+			__instance.lobbyNameInputField.text = "CTNFastStartup Lobby";
 			__instance.ConfirmHostButton();
 
 			firstTimeLoad = false;
