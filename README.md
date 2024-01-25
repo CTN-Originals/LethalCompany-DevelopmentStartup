@@ -1,7 +1,7 @@
 # DevelopmentStartup
 Skip all the useless startup menus and jump right into a game! Tool for developers.
 
-![Startup preview gif](https://raw.githubusercontent.com/CTN-Originals/LethalCompany-DevelopmentStartup/main/DevelopmentStartup/resources/DevelopmentStartup-preview.gif)
+![Startup preview gif](https://github.com/CTN-Originals/LethalCompany-DevelopmentStartup/blob/main/resources/DevelopmentStartup-preview.gif)
 
 ## Installation
 ### Manual
