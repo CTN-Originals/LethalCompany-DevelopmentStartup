@@ -1,8 +1,8 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
-using UnityEngine;
-using UnityEngine.SceneManagement;
+
+using DevelopmentStartup.Utilities;
 
 namespace DevelopmentStartup
 {
@@ -27,56 +27,20 @@ namespace DevelopmentStartup
 		}
 
 		private void ConfigFile() {
-			launchMode = Config.Bind("General", "LaunchMode", LaunchMode.LAN, "The launch mode to start in (Online or LAN)").Value;
-			Console.Log($"LaunchMode: {launchMode}");
+			//TODO Edit the config of the FastStartup dependency to allow for this to be set ... or give up on this setting
+			// launchMode = Config.Bind("General", "LaunchMode", LaunchMode.LAN, "The launch mode to start in (Online or LAN)").Value;
+			// Console.Log($"LaunchMode: {launchMode}");
 		}
 	}
 
-	public class Console {
-		public static void Log(string message) {
-			Plugin.CLog.LogInfo(message);
-		}
-	}
-
-	// Source: https://thunderstore.io/c/lethal-company/p/Owen3H/IntroTweaks/source/
-	[HarmonyPatch(typeof(PreInitSceneScript))]
-	internal class PreSceneInitPatch
-	{
-		[HarmonyPrefix]
-		[HarmonyPatch("SkipToFinalSetting")]
-		private static bool OverrideSkipToFinal()
-		{
-			return false;
-		}
-
-		[HarmonyPostfix]
-		[HarmonyPatch("Start")]
-		private static void SkipToOnline(PreInitSceneScript __instance, ref bool ___choseLaunchOption)
-		{
-			CollectionExtensions.Do<GameObject>(__instance.LaunchSettingsPanels, delegate(GameObject p) {
-				p.gameObject.SetActive(false);
-			});
-			__instance.currentLaunchSettingPanel = 0;
-			__instance.headerText.text = "";
-			__instance.blackTransition.gameObject.SetActive(false);
-			__instance.continueButton.gameObject.SetActive(false);
-			___choseLaunchOption = true;
-			__instance.mainAudio.PlayOneShot(__instance.selectSFX);
-			IngamePlayerSettings.Instance.SetPlayerFinishedLaunchOptions();
-			IngamePlayerSettings.Instance.SaveChangedSettings();
-			if (!IngamePlayerSettings.Instance.encounteredErrorDuringSave)
-			{
-				switch (Plugin.launchMode) {
-					case Plugin.LaunchMode.Online:
-						SceneManager.LoadScene("InitScene");
-						break;
-					case Plugin.LaunchMode.LAN:
-					default:
-						SceneManager.LoadScene("InitSceneLANMode");
-						break;
-				}
-				// SceneManager.LoadScene("InitScene");
-			}
+	//? Prevent the game from loading default settings before loading player settings (for example, full screen mode on startup)
+	[HarmonyPatch(typeof(IngamePlayerSettings))]
+	internal class IngamePlayerSettingsPatch {
+		[HarmonyPostfix, HarmonyPatch("Awake")]
+		private static void AwakePatch(IngamePlayerSettings __instance) {
+			Console.LogMessage("Loading settings from prefs before the game loads default settings");
+			__instance.LoadSettingsFromPrefs();
+			__instance.UpdateGameToMatchSettings();
 		}
 	}
 
@@ -84,25 +48,27 @@ namespace DevelopmentStartup
 	[HarmonyPatch(typeof(MenuManager))]
 	internal class MenuManagerPatch {
 		private static bool firstTimeLoad = true;
-		
-		[HarmonyPostfix]
-		[HarmonyPatch("Start")]
-		static public void StartPatch() {
-			// Console.Log("MenuManager.Start() called");
-		}
+
 		[HarmonyPostfix]
 		[HarmonyPatch("OnEnable")]
 		static public void OnEnablePatch(MenuManager __instance) {
-			// Console.Log("MenuManager.OnEnablePatch() called");
-			if (!firstTimeLoad) {
-				return;
+			if (!firstTimeLoad) return;
+			Console.LogMessage("To change the launch mode (Online | Lan), edit the config file for the \"FastStartup\" plugin");
+			
+			if (__instance.menuButtons != null && __instance.menuButtons.name == "MainButtons") {
+				Console.LogInfo("MenuManager.OnEnablePatch() called - MainButtons");
+				JumpInGame(__instance);
 			}
-			__instance.ClickHostButton();
-			if (Plugin.launchMode == Plugin.LaunchMode.LAN) {
-				__instance.LAN_HostSetLocal();
+			else {
+				Console.LogInfo("MenuManager.OnEnablePatch() called - not MainButtons");
 			}
+		}
+
+		static private void JumpInGame(MenuManager __instance) {
+			Console.LogDebug("Entering lobby name");
 			__instance.lobbyNameInputField.text = "DevelopmentStartup Lobby";
-			__instance.ConfirmHostButton();
+			Console.LogDebug("Confirm Host Button");
+			__instance.ConfirmHostButton(); //? This is the same as clicking the "Host > Confirm" buttons
 
 			firstTimeLoad = false;
 		}
