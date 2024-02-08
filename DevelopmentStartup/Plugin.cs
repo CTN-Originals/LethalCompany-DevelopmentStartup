@@ -43,8 +43,7 @@ namespace DevelopmentStartup
         }
 
         private static Mutex AppMutex;
-        internal static bool CheckMutex()
-        {
+        internal static bool CheckMutex() {
             try
             {
 				if (AppMutex == null) AppMutex = new Mutex(true, "LethalCompany-" + PluginInfo.PLUGIN_NAME);
@@ -92,12 +91,9 @@ namespace DevelopmentStartup
 			__instance.lobbyNameInputField.text = "DevelopmentStartup Lobby";
 			Console.LogDebug("Confirm Host Button");
 
-			if (Plugin.IsHostInstance)
-			{
+			if (Plugin.IsHostInstance) {
 				__instance.ConfirmHostButton(); //? This is the same as clicking the "Host > Confirm" buttons
-			}
-			else
-			{
+			} else {
 				__instance.StartAClient();
 			}
 
