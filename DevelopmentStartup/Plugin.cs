@@ -28,13 +28,14 @@ namespace DevelopmentStartup
 		private readonly Harmony harmony = new Harmony(PluginInfo.PLUGIN_GUID);
 
         void Awake() {
-			IsHostInstance = !autoJoinLan || !CheckMutex();
 
             CLog = BepInEx.Logging.Logger.CreateLogSource(PluginInfo.PLUGIN_NAME);
 			CLog.LogInfo($"Plugin {PluginInfo.PLUGIN_NAME} is loaded! Version: {PluginInfo.PLUGIN_VERSION}");
 			
 			this.ConfigFile();
 			harmony.PatchAll();
+
+			IsHostInstance = !autoJoinLan || !CheckMutex();
 		}
 
 		private void ConfigFile() {
