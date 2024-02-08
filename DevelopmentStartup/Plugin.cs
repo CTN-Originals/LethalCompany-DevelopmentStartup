@@ -4,10 +4,6 @@ using HarmonyLib;
 
 using DevelopmentStartup.Utilities;
 using System.Threading;
-using UnityEngine;
-using System.IO;
-using System.Diagnostics;
-using System.Collections;
 
 namespace DevelopmentStartup
 {
