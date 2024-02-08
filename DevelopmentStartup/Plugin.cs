@@ -24,7 +24,6 @@ namespace DevelopmentStartup
 		private readonly Harmony harmony = new Harmony(PluginInfo.PLUGIN_GUID);
 
         void Awake() {
-
             CLog = BepInEx.Logging.Logger.CreateLogSource(PluginInfo.PLUGIN_NAME);
 			CLog.LogInfo($"Plugin {PluginInfo.PLUGIN_NAME} is loaded! Version: {PluginInfo.PLUGIN_VERSION}");
 			
@@ -44,13 +43,11 @@ namespace DevelopmentStartup
 
         private static Mutex AppMutex;
         internal static bool CheckMutex() {
-            try
-            {
+            try {
 				if (AppMutex == null) AppMutex = new Mutex(true, "LethalCompany-" + PluginInfo.PLUGIN_NAME);
                 return AppMutex != null && !AppMutex.WaitOne(System.TimeSpan.Zero, true);
             }
-            catch
-            {
+            catch {
                 return false;
             }
         }

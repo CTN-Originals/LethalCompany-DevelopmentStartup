@@ -3,11 +3,11 @@ using UnityEngine;
 namespace DevelopmentStartup.Utilities
 {
 	public static class Console {
-#if DEBUG
-		public const bool DebugState = true;
-#else
-		public const bool DebugState = false;
-#endif
+		#if DEBUG
+			public const bool DebugState = true;
+		#else
+			public const bool DebugState = false;
+		#endif
 
         public static void Log(string message) 			{ SendLog(message, "Log"); }
 		public static void LogInfo(string message) 		{ SendLog(message, "LogInfo"); }
