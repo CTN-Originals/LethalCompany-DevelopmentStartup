@@ -3,9 +3,13 @@ using UnityEngine;
 namespace DevelopmentStartup.Utilities
 {
 	public static class Console {
-		public static bool DebugState = false;
+#if DEBUG
+		public const bool DebugState = true;
+#else
+		public const bool DebugState = false;
+#endif
 
-		public static void Log(string message) 			{ SendLog(message, "Log"); }
+        public static void Log(string message) 			{ SendLog(message, "Log"); }
 		public static void LogInfo(string message) 		{ SendLog(message, "LogInfo"); }
 		public static void LogError(string message) 	{ SendLog(message, "LogError"); }
 		public static void LogWarning(string message) 	{ SendLog(message, "LogWarning"); }
