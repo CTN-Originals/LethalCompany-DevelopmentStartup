@@ -3,6 +3,11 @@ using BepInEx.Logging;
 using HarmonyLib;
 
 using DevelopmentStartup.Utilities;
+using System.Threading;
+using UnityEngine;
+using System.IO;
+using System.Diagnostics;
+using System.Collections;
 
 namespace DevelopmentStartup
 {
@@ -13,13 +18,19 @@ namespace DevelopmentStartup
 			Online,
 			LAN,
 		}
-		public static LaunchMode launchMode = LaunchMode.LAN;
-		public static ManualLogSource CLog;
 
+		public static LaunchMode launchMode = LaunchMode.LAN;
+		public static bool autoJoinLan;
+
+        internal static bool IsHostInstance;
+
+		public static ManualLogSource CLog;
 		private readonly Harmony harmony = new Harmony(PluginInfo.PLUGIN_GUID);
 
-		void Awake() {
-			CLog = BepInEx.Logging.Logger.CreateLogSource(PluginInfo.PLUGIN_NAME);
+        void Awake() {
+			IsHostInstance = !autoJoinLan || !CheckMutex();
+
+            CLog = BepInEx.Logging.Logger.CreateLogSource(PluginInfo.PLUGIN_NAME);
 			CLog.LogInfo($"Plugin {PluginInfo.PLUGIN_NAME} is loaded! Version: {PluginInfo.PLUGIN_VERSION}");
 			
 			this.ConfigFile();
@@ -30,8 +41,24 @@ namespace DevelopmentStartup
 			//TODO Edit the config of the FastStartup dependency to allow for this to be set ... or give up on this setting
 			// launchMode = Config.Bind("General", "LaunchMode", LaunchMode.LAN, "The launch mode to start in (Online or LAN)").Value;
 			// Console.Log($"LaunchMode: {launchMode}");
-		}
-	}
+
+			autoJoinLan = Config.Bind("General", "Auto Join LAN", true, "Automatically join LAN lobbies when game is launched more than once.").Value;
+        }
+
+        private static Mutex AppMutex;
+        internal static bool CheckMutex()
+        {
+            try
+            {
+				if (AppMutex == null) AppMutex = new Mutex(true, "LethalCompany-" + PluginInfo.PLUGIN_NAME);
+                return AppMutex != null && !AppMutex.WaitOne(System.TimeSpan.Zero, true);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+    }
 
 	//? Prevent the game from loading default settings before loading player settings (for example, full screen mode on startup)
 	[HarmonyPatch(typeof(IngamePlayerSettings))]
@@ -43,7 +70,6 @@ namespace DevelopmentStartup
 			__instance.UpdateGameToMatchSettings();
 		}
 	}
-
 
 	[HarmonyPatch(typeof(MenuManager))]
 	internal class MenuManagerPatch {
@@ -68,9 +94,17 @@ namespace DevelopmentStartup
 			Console.LogDebug("Entering lobby name");
 			__instance.lobbyNameInputField.text = "DevelopmentStartup Lobby";
 			Console.LogDebug("Confirm Host Button");
-			__instance.ConfirmHostButton(); //? This is the same as clicking the "Host > Confirm" buttons
 
-			firstTimeLoad = false;
+			if (Plugin.IsHostInstance)
+			{
+				__instance.ConfirmHostButton(); //? This is the same as clicking the "Host > Confirm" buttons
+			}
+			else
+			{
+				__instance.StartAClient();
+			}
+
+            firstTimeLoad = false;
 		}
 	}
 }
