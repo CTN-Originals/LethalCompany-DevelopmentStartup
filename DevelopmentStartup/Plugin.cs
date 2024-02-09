@@ -24,8 +24,14 @@ namespace DevelopmentStartup
 		private readonly Harmony harmony = new Harmony(PluginInfo.PLUGIN_GUID);
 
         void Awake() {
+			#if DEBUG //TODO make a config option for this
+				const bool debugMode = true;
+			#else
+				const bool debugMode = false;
+			#endif
+
             CLog = BepInEx.Logging.Logger.CreateLogSource(PluginInfo.PLUGIN_NAME);
-			CLog.LogInfo($"Plugin {PluginInfo.PLUGIN_NAME} is loaded! Version: {PluginInfo.PLUGIN_VERSION}");
+			CLog.LogInfo($"Plugin {PluginInfo.PLUGIN_NAME} is loaded! Version: {PluginInfo.PLUGIN_VERSION} ({(debugMode ? "Debug" : "Release")})");
 			
 			this.ConfigFile();
 			harmony.PatchAll();
@@ -38,7 +44,7 @@ namespace DevelopmentStartup
 			// launchMode = Config.Bind("General", "LaunchMode", LaunchMode.LAN, "The launch mode to start in (Online or LAN)").Value;
 			// Console.Log($"LaunchMode: {launchMode}");
 
-			autoJoinLan = Config.Bind("General", "Auto Join LAN", true, "Automatically join LAN lobbies when game is launched more than once.").Value;
+			autoJoinLan = Config.Bind("General", "AutoJoinLAN", true, "Automatically join LAN lobbies when game is launched more than once.").Value;
         }
 
         private static Mutex AppMutex;
