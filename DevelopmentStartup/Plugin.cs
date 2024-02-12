@@ -17,6 +17,7 @@ namespace DevelopmentStartup
 
 		public static LaunchMode launchMode = LaunchMode.LAN;
 		public static bool autoJoinLan;
+		public static bool autoPullLever;
 
         internal static bool IsHostInstance;
 
@@ -45,6 +46,7 @@ namespace DevelopmentStartup
 			// Console.Log($"LaunchMode: {launchMode}");
 
 			autoJoinLan = Config.Bind("General", "AutoJoinLAN", true, "Automatically join LAN lobbies when game is launched more than once.").Value;
+			autoPullLever = Config.Bind("General", "Auto Pull Lever", false, "Automatically pull the ship's lever on startup.").Value;
         }
 
         private static Mutex AppMutex;
@@ -101,6 +103,25 @@ namespace DevelopmentStartup
 			}
 
             firstTimeLoad = false;
+		}
+	}
+
+	[HarmonyPatch(typeof(StartMatchLever))]
+	internal class StartMatchLeverPatch {
+		private static bool hasPulledLever;
+
+		[HarmonyPatch("Start"), HarmonyPostfix]
+		static public void StartPatch(StartMatchLever __instance) {
+			if (!Plugin.autoPullLever || hasPulledLever) return;
+
+			Console.LogDebug("Pullling Ship Lever");
+
+			// __instance.LeverAnimation();
+			hasPulledLever = true;
+			__instance.leverHasBeenPulled = true;
+			__instance.leverAnimatorObject.SetBool("pullLever", true);
+			__instance.triggerScript.interactable = false;
+			__instance.PullLever();
 		}
 	}
 }
