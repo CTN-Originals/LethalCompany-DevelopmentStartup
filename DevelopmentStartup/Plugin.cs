@@ -4,6 +4,7 @@ using HarmonyLib;
 
 using DevelopmentStartup.Utilities;
 using System.Threading;
+using System.Reflection;
 
 namespace DevelopmentStartup
 {
@@ -17,6 +18,9 @@ namespace DevelopmentStartup
 
 		public static LaunchMode launchMode = LaunchMode.LAN;
 		public static bool autoJoinLan;
+		public static bool autoPullLever;
+		public static bool tpToEntrance;
+		public static bool teleportInside;
 
         internal static bool IsHostInstance;
 
@@ -45,6 +49,9 @@ namespace DevelopmentStartup
 			// Console.Log($"LaunchMode: {launchMode}");
 
 			autoJoinLan = Config.Bind("General", "AutoJoinLAN", true, "Automatically join LAN lobbies when game is launched more than once.").Value;
+			autoPullLever = Config.Bind("General", "AutoPullLever", false, "Automatically pull the ship's lever on startup.").Value;
+			tpToEntrance = Config.Bind("General", "TeleportToEntrance", false, "Automatically teleports you to the main entrance on level load.").Value;
+			teleportInside = Config.Bind("General", "TeleportInside", false, "Teleports you inside the facility instead (Requires 'Teleport to Entrance' enabled).").Value;
         }
 
         private static Mutex AppMutex;
@@ -101,6 +108,44 @@ namespace DevelopmentStartup
 			}
 
             firstTimeLoad = false;
+		}
+	}
+
+	[HarmonyPatch(typeof(StartMatchLever))]
+	internal class StartMatchLeverPatch {
+		private static bool hasPulledLever;
+
+		[HarmonyPatch("Start"), HarmonyPostfix]
+		static public void StartPatch(StartMatchLever __instance) {
+			if (!Plugin.autoPullLever || hasPulledLever) return;
+
+			Console.LogDebug("Pullling Ship Lever");
+
+			// __instance.LeverAnimation();
+			hasPulledLever = true;
+			__instance.leverHasBeenPulled = true;
+			__instance.leverAnimatorObject.SetBool("pullLever", true);
+			__instance.triggerScript.interactable = false;
+			__instance.PullLever();
+		}
+	}
+
+	[HarmonyPatch(typeof(StartOfRound))]
+    internal class StartOfRoundPatch {
+		private static bool attemptedTp;
+
+		[HarmonyPatch("TeleportPlayerInShipIfOutOfRoomBounds"), HarmonyPostfix]
+		static public void TeleportPlayerInShipIfOutOfRoomBoundsStats(StartOfRound __instance) {
+			if (!Plugin.tpToEntrance || attemptedTp || !__instance.shipDoorsEnabled) return;
+
+			MethodInfo findEntranceMethod = AccessTools.Method(typeof(RoundManager), "FindMainEntranceScript");
+			EntranceTeleport entrance = (EntranceTeleport)findEntranceMethod.Invoke(null, new object[] { Plugin.teleportInside });
+
+			if (entrance != null) {
+				entrance.TeleportPlayer();
+			}
+
+			attemptedTp = true;
 		}
 	}
 }

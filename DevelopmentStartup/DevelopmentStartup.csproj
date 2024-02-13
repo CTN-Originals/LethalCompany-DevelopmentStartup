@@ -20,6 +20,7 @@
 	<Reference Include="Assembly-CSharp"><HintPath>..\libs\Assembly-CSharp.dll</HintPath></Reference>
 	<Reference Include="UnityEngine.UI"><HintPath>..\libs\UnityEngine.UI.dll</HintPath></Reference>
 	<Reference Include="Unity.TextMeshPro"><HintPath>..\libs\Unity.TextMeshPro.dll</HintPath></Reference>
+  <Reference Include="Unity.Netcode.Runtime"><HintPath>..\libs\Unity.Netcode.Runtime.dll</HintPath></Reference>
   </ItemGroup>
   
   <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
