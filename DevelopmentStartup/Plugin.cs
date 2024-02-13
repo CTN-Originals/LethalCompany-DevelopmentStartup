@@ -28,7 +28,7 @@ namespace DevelopmentStartup
 		private readonly Harmony harmony = new Harmony(PluginInfo.PLUGIN_GUID);
 
         void Awake() {
-			#if DEBUG //TODO make a config option for this
+			#if DEBUG //TODO make a config option for this.
 				const bool debugMode = true;
 			#else
 				const bool debugMode = false;
@@ -50,8 +50,8 @@ namespace DevelopmentStartup
 
 			autoJoinLan = Config.Bind("General", "AutoJoinLAN", true, "Automatically join LAN lobbies when game is launched more than once.").Value;
 			autoPullLever = Config.Bind("General", "AutoPullLever", false, "Automatically pull the ship's lever on startup.").Value;
-			tpToEntrance = Config.Bind("General", "TeleportToEntrance", false, "Automatically teleports you to the main entrance on level load.").Value;
-			teleportInside = Config.Bind("General", "TeleportInside", false, "Teleports you inside the facility instead (Requires 'Teleport to Entrance' enabled).").Value;
+			tpToEntrance = Config.Bind("General", "TeleportToEntrance", false, "Automatically teleports you to the main entrance on level load (Requires 'AutoPullLever' enabled).").Value;
+			teleportInside = Config.Bind("General", "TeleportInside", false, "Teleports you inside the facility instead (Requires 'TeleportToEntrance' enabled).").Value;
         }
 
         private static Mutex AppMutex;
@@ -138,11 +138,17 @@ namespace DevelopmentStartup
 		static public void TeleportPlayerInShipIfOutOfRoomBoundsStats(StartOfRound __instance) {
 			if (!Plugin.tpToEntrance || attemptedTp || !__instance.shipDoorsEnabled) return;
 
+			Console.LogDebug("Teleporting to entrance...");
+
 			MethodInfo findEntranceMethod = AccessTools.Method(typeof(RoundManager), "FindMainEntranceScript");
 			EntranceTeleport entrance = (EntranceTeleport)findEntranceMethod.Invoke(null, new object[] { Plugin.teleportInside });
 
 			if (entrance != null) {
 				entrance.TeleportPlayer();
+				Console.LogDebug("Player teleported to entrance");
+			}
+			else {
+				Console.LogError("Failed to find entrance");
 			}
 
 			attemptedTp = true;
